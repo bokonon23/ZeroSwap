@@ -7,7 +7,7 @@ import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom'
 import { Connection, PublicKey, LAMPORTS_PER_SOL, clusterApiUrl } from '@solana/web3.js'
 
 function WalletConnectButton() {
-  const { wallet, connect, disconnect, connected } = useWallet()
+  const { wallet, connect, disconnect, connected, publicKey } = useWallet()
 
   const handleClick = () => {
     if (connected) {
@@ -24,7 +24,7 @@ function WalletConnectButton() {
       onClick={handleClick}
       className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
     >
-      {connected ? 'Disconnect' : 'Connect Wallet'}
+      {connected ? `Disconnect ${publicKey?.toBase58().slice(0, 4)}...${publicKey?.toBase58().slice(-4)}` : 'Connect Wallet'}
     </button>
   )
 }
@@ -48,11 +48,12 @@ function ExchangeUI() {
   useEffect(() => {
     const fetchPrice = async () => {
       try {
+        // Note: This is a mock price fetch. In a real scenario, you'd fetch the price for the ZERO token.
         const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd')
         const data = await response.json()
         setPrice(data.solana.usd)
       } catch (error) {
-        console.error('Failed to fetch SOL price:', error)
+        console.error('Failed to fetch ZERO price:', error)
       }
     }
     fetchPrice()
@@ -63,7 +64,7 @@ function ExchangeUI() {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-        <h1 className="text-2xl font-bold mb-6 text-center">Solana Exchange</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">ZERO SWAP</h1>
         <div className="mb-6">
           <WalletConnectButton />
         </div>
@@ -74,7 +75,7 @@ function ExchangeUI() {
           </div>
         )}
         <div className="mb-6">
-          <p className="text-gray-600">SOL Price: {price !== null ? `$${price.toFixed(2)}` : 'Loading...'}</p>
+          <p className="text-gray-600">ZERO Price: {price !== null ? `$${price.toFixed(2)}` : 'Loading...'}</p>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <input
@@ -83,7 +84,7 @@ function ExchangeUI() {
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
           <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
-            Buy SOL
+            Buy Zero
           </button>
         </div>
       </div>
@@ -95,7 +96,6 @@ function CustomWalletProvider({ children }: { children: React.ReactNode }) {
   const network = WalletAdapterNetwork.Mainnet
   const endpoint = useMemo(() => clusterApiUrl(network), [network])
   
-  // Ensure wallets are correctly initialized
   const wallets = useMemo(
     () => [
       new PhantomWalletAdapter(),
@@ -112,7 +112,7 @@ function CustomWalletProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-export default function Component() {
+export default function ExchangeComponent() {
   return (
     <CustomWalletProvider>
       <ExchangeUI />
